@@ -1,15 +1,14 @@
 # System Prompt Compliance Analysis RAG Chatbot
 
-A real-time system prompt compliance analysis tool that uses RAG (Retrieval-Augmented Generation) and multiple LLM providers to evaluate how well AI responses follow specified guidelines.
+시스템 프롬프트에 대한 준수도를 분석하는 RAG 기반 챗봇입니다. 여러 LLM 프로바이더를 지원하며, AI 응답이 지정된 가이드라인을 얼마나 잘 따르는지 평가합니다.
 
 ## Features
 
-- **Multiple LLM Provider Support**: Seamlessly switch between Upstage Solar, OpenAI, Anthropic Claude, Google Gemini, and Ollama
-- **Automatic Guideline Extraction**: Use AI to automatically extract guidelines from system prompts
-- **Real-time Compliance Analysis**: Get instant feedback on whether responses follow your guidelines
-- **Interactive Dashboard**: Visual compliance scoring with detailed breakdowns
-- **RAG Integration**: ChromaDB-powered retrieval for context-aware responses
-- **Manual Guideline Management**: Add, remove, and customize guidelines as needed
+- 다양한 LLM 프로바이더 지원 (Upstage Solar, OpenAI, Anthropic Claude, Google Gemini, Ollama)
+- AI 기반 자동 가이드라인 추출
+- 실시간 준수도 분석 및 스코어링
+- ChromaDB 기반 RAG 통합
+- 수동 가이드라인 관리
 
 ## Architecture
 
@@ -279,10 +278,6 @@ curl -X POST http://localhost:8000/api/chat/upload-document \
 - Delete `backend/data/chroma` folder and restart
 - Check write permissions in the backend directory
 
-## Repository
-
-GitHub: [https://github.com/jinsoo96/System-Prompt-Compliance](https://github.com/jinsoo96/System-Prompt-Compliance)
-
 ## License
 
-MIT License
+Copyright (c) 2026 jinsoo96. All rights reserved.
