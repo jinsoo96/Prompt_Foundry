@@ -258,26 +258,6 @@ curl -X POST http://localhost:8000/api/chat/upload-document \
   }'
 ```
 
-## Troubleshooting
-
-### Backend won't start
-- Check if port 8000 is already in use
-- Verify all API keys are set in `.env`
-- Ensure virtual environment is activated
-
-### Frontend won't start
-- Delete `node_modules` and run `npm install` again
-- Check if port 3000 is available
-
-### LLM API errors
-- Verify your API keys are valid
-- Check your API rate limits
-- For Ollama: ensure `ollama serve` is running
-
-### ChromaDB errors
-- Delete `backend/data/chroma` folder and restart
-- Check write permissions in the backend directory
-
 ## License
 
 Copyright (c) 2026 jinsoo96. All rights reserved.
