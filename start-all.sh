@@ -1,5 +1,9 @@
 #!/bin/bash
 
+set -euo pipefail
+
+export PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
+
 echo "백엔드 + 프론트엔드 동시 시작..."
 
 # .env 파일에서 LLM_PROVIDER 확인
@@ -84,7 +88,6 @@ echo "백엔드 로그 (실시간):"
 tail -f backend.log &
 TAIL_PID=$!
 
-# Ctrl+C 시 모든 프로세스 종료
 cleanup() {
     echo ""
     echo "서버 종료 중..."
@@ -94,14 +97,12 @@ cleanup() {
     if [ -n "$OLLAMA_PID" ]; then
         kill $OLLAMA_PID 2>/dev/null
     fi
-    # 자식 프로세스들도 종료
-    pkill -P $BACKEND_PID 2>/dev/null
-    pkill -P $FRONTEND_PID 2>/dev/null
+    pkill -P $BACKEND_PID 2>/dev/null || true
+    pkill -P $FRONTEND_PID 2>/dev/null || true
     echo "모든 서버가 종료되었습니다."
     exit 0
 }
 
 trap cleanup SIGINT SIGTERM
 
-# 프로세스가 실행되는 동안 대기
 wait

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ChatInterface } from './components/ChatInterface';
 import { SystemPromptEditor } from './components/SystemPromptEditor';
 import { ComplianceDashboard } from './components/ComplianceDashboard';
+import { PromptDashboard } from './components/PromptDashboard';
 import { chatApi, complianceApi } from './services/api';
 import { SystemPrompt, ChatMessage, ComplianceAnalysis } from './types';
 
@@ -162,6 +163,7 @@ function App() {
             analysis={currentAnalysis}
             isLoading={isAnalyzing}
           />
+          <PromptDashboard />
         </div>
       </div>
 
@@ -213,6 +215,7 @@ const styles: Record<string, React.CSSProperties> = {
   rightColumn: {
     display: 'flex',
     flexDirection: 'column',
+    gap: '20px',
   },
   footer: {
     backgroundColor: '#343a40',
@@ -220,11 +223,6 @@ const styles: Record<string, React.CSSProperties> = {
     textAlign: 'center',
     padding: '16px',
     fontSize: '14px',
-  },
-  topRow: {
-    display: 'flex',
-    gap: '16px',
-    marginBottom: '20px',
   },
   modelSelector: {
     flex: 1,

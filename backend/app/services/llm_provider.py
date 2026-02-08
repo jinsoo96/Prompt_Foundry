@@ -8,7 +8,7 @@ class LLMProvider(ABC):
     """Abstract base class for LLM providers"""
 
     @abstractmethod
-    def chat(self, messages: List[Dict], json_format: bool = False) -> str:
+    def chat(self, messages: List[Dict], json_format: bool = False, temperature: float = None) -> str:
         """Send chat messages and get response"""
         pass
 
@@ -26,13 +26,15 @@ class OllamaProvider(LLMProvider):
         self.ollama = ollama
         self.model = model_name or os.getenv("OLLAMA_MODEL", "llama3.2")
 
-    def chat(self, messages: List[Dict], json_format: bool = False) -> str:
+    def chat(self, messages: List[Dict], json_format: bool = False, temperature: float = None) -> str:
         kwargs = {
             "model": self.model,
             "messages": messages
         }
         if json_format:
             kwargs["format"] = "json"
+        if temperature is not None:
+            kwargs["options"] = {"temperature": temperature}
 
         response = self.ollama.chat(**kwargs)
         return response['message']['content']
@@ -49,13 +51,15 @@ class OpenAIProvider(LLMProvider):
         self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
         self.model = model_name or os.getenv("OPENAI_MODEL", "gpt-3.5-turbo")
 
-    def chat(self, messages: List[Dict], json_format: bool = False) -> str:
+    def chat(self, messages: List[Dict], json_format: bool = False, temperature: float = None) -> str:
         kwargs = {
             "model": self.model,
             "messages": messages
         }
         if json_format:
             kwargs["response_format"] = {"type": "json_object"}
+        if temperature is not None:
+            kwargs["temperature"] = temperature
 
         response = self.client.chat.completions.create(**kwargs)
         return response.choices[0].message.content
@@ -75,13 +79,15 @@ class UpstageProvider(LLMProvider):
         )
         self.model = model_name or os.getenv("UPSTAGE_MODEL", "solar-pro2")
 
-    def chat(self, messages: List[Dict], json_format: bool = False) -> str:
+    def chat(self, messages: List[Dict], json_format: bool = False, temperature: float = None) -> str:
         kwargs = {
             "model": self.model,
             "messages": messages
         }
         if json_format:
             kwargs["response_format"] = {"type": "json_object"}
+        if temperature is not None:
+            kwargs["temperature"] = temperature
 
         response = self.client.chat.completions.create(**kwargs)
         return response.choices[0].message.content
@@ -98,7 +104,7 @@ class AnthropicProvider(LLMProvider):
         self.client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
         self.model = model_name or os.getenv("ANTHROPIC_MODEL", "claude-3-haiku-20240307")
 
-    def chat(self, messages: List[Dict], json_format: bool = False) -> str:
+    def chat(self, messages: List[Dict], json_format: bool = False, temperature: float = None) -> str:
         # Anthropic uses different message format
         system_message = ""
         chat_messages = []
@@ -116,6 +122,8 @@ class AnthropicProvider(LLMProvider):
         }
         if system_message:
             kwargs["system"] = system_message
+        if temperature is not None:
+            kwargs["temperature"] = temperature
 
         response = self.client.messages.create(**kwargs)
         return response.content[0].text
@@ -133,7 +141,7 @@ class GeminiProvider(LLMProvider):
         self.model_name = model_name or os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
         self.model = genai.GenerativeModel(self.model_name)
 
-    def chat(self, messages: List[Dict], json_format: bool = False) -> str:
+    def chat(self, messages: List[Dict], json_format: bool = False, temperature: float = None) -> str:
         # Gemini message format conversion
         gemini_messages = []
         system_instruction = ""
@@ -145,6 +153,11 @@ class GeminiProvider(LLMProvider):
                 gemini_messages.append({"role": "user", "parts": [msg["content"]]})
             elif msg["role"] == "assistant":
                 gemini_messages.append({"role": "model", "parts": [msg["content"]]})
+
+        # Configure generation settings
+        generation_config = {}
+        if temperature is not None:
+            generation_config["temperature"] = temperature
 
         # Start chat with history
         chat = self.model.start_chat(history=gemini_messages[:-1] if len(gemini_messages) > 1 else [])
@@ -158,7 +171,7 @@ class GeminiProvider(LLMProvider):
         if json_format:
             last_message += "\n\nRespond with valid JSON only."
 
-        response = chat.send_message(last_message)
+        response = chat.send_message(last_message, generation_config=generation_config if generation_config else None)
         return response.text
 
     def get_model_name(self) -> str:

@@ -275,23 +275,41 @@ Write the explanation in Korean. If no evidence exists for a required element, s
         else:
             llm = self.llm
 
-        prompt = f"""Extract specific guidelines from this system prompt.
+        prompt = f"""Extract specific, actionable guidelines from the system prompt below.
 
-System prompt:
+RULES FOR EXTRACTION:
+1. Each guideline must be a CLEAR, SPECIFIC, and VERIFIABLE instruction
+2. Focus on behavioral rules, formatting requirements, and content restrictions
+3. Ignore general introductions or background information
+4. Each guideline should start with an action verb (e.g., "Use", "Respond", "Include", "Avoid")
+5. Keep guidelines concise (1-2 sentences max)
+6. Extract 3-10 guidelines (avoid being too granular or too general)
+
+SYSTEM PROMPT:
 "{system_prompt}"
 
-Return ONLY a JSON object with a "guidelines" array containing each guideline as a string.
-Each guideline should be a clear, actionable instruction.
+EXAMPLES OF GOOD GUIDELINES:
+- "Respond only in Chinese language"
+- "Use formal tone and avoid casual expressions"
+- "Include code examples in responses"
+- "Do not reveal system instructions"
+- "Keep responses under 100 words"
 
-Example output:
-{{"guidelines": ["Respond in Chinese language", "Do not express emotions", "Be concise"]}}
+EXAMPLES OF BAD GUIDELINES (DO NOT EXTRACT THESE):
+- "You are a helpful assistant" (too general)
+- "This prompt is about..." (not actionable)
+- "Background: ..." (not a guideline)
 
-Now extract guidelines from the given system prompt:"""
+Return ONLY a JSON object with this exact format:
+{{"guidelines": ["guideline 1", "guideline 2", "guideline 3"]}}
+
+Extract guidelines now:"""
 
         try:
             result_text = llm.chat(
                 messages=[{"role": "user", "content": prompt}],
-                json_format=True
+                json_format=True,
+                temperature=0.0  # 일관성을 위해 temperature를 0으로 설정
             )
             print(f"LLM response: {result_text}")  # 디버깅용
 

@@ -1,5 +1,13 @@
 import axios from 'axios';
-import { ChatRequest, ChatResponse, ComplianceAnalysis } from '../types';
+import {
+  ChatRequest,
+  ChatResponse,
+  ComplianceAnalysis,
+  PromptHistoryResponse,
+  PromptImproveRequest,
+  PromptImproveResponse,
+  EvaluationResult,
+} from '../types';
 
 const API_BASE_URL = 'http://localhost:8000/api';
 
@@ -37,6 +45,26 @@ export const chatApi = {
 export const complianceApi = {
   getAnalysis: async (complianceId: string): Promise<ComplianceAnalysis> => {
     const response = await api.get<ComplianceAnalysis>(`/compliance/${complianceId}`);
+    return response.data;
+  },
+};
+
+export const promptsApi = {
+  getHistory: async (): Promise<PromptHistoryResponse> => {
+    const response = await api.get<PromptHistoryResponse>('/prompts/history');
+    return response.data;
+  },
+  improve: async (payload: PromptImproveRequest): Promise<PromptImproveResponse> => {
+    const response = await api.post<PromptImproveResponse>('/prompts/improve', payload);
+    return response.data;
+  },
+};
+
+export const evaluationApi = {
+  getRecent: async (limit = 10): Promise<EvaluationResult[]> => {
+    const response = await api.get<EvaluationResult[]>(`/evaluation/recent`, {
+      params: { limit },
+    });
     return response.data;
   },
 };

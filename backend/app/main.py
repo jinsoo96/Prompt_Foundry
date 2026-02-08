@@ -1,10 +1,9 @@
+from dotenv import load_dotenv
+load_dotenv()
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes import chat, compliance
-from dotenv import load_dotenv
-
-# .env 파일 로드
-load_dotenv()
+from app.routes import chat, compliance, evaluation, prompt
 
 app = FastAPI(
     title="Prompt Compliance RAG API",
@@ -24,6 +23,8 @@ app.add_middleware(
 # 라우터 등록
 app.include_router(chat.router)
 app.include_router(compliance.router)
+app.include_router(evaluation.router)
+app.include_router(prompt.router)
 
 
 @app.get("/")

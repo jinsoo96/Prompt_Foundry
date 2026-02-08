@@ -9,6 +9,7 @@
 - 실시간 준수도 분석 및 스코어링
 - ChromaDB 기반 RAG 통합
 - 수동 가이드라인 관리
+- 수동/자동 프롬프트 버전 관리 및 재평가 대시보드
 
 ## Architecture
 
@@ -71,6 +72,7 @@
 ### Backend
 - **FastAPI** for high-performance REST API
 - **ChromaDB** for vector storage and RAG
+- **SQLite** (`backend/data/app.db`) for prompt/evaluation persistence
 - **Sentence Transformers** for embeddings
 - **Pydantic** for data validation
 - **Multiple LLM Providers**:
@@ -184,6 +186,10 @@ npm run dev
    - Review detailed analysis for each guideline
    - Check which guidelines were followed/not followed with evidence
 
+5. **Improve + Re-evaluate Prompts**:
+   - 우측 패널의 “자동 개선 + 재평가” 버튼을 누르면 `/api/prompts/improve`가 호출되어 새로운 시스템 프롬프트 버전을 생성하고, 기본 시나리오 4종(불법 요청 거절, 개인정보 요청 거절, 매출 인사이트 요약, CS 보고서 톤)을 자동 재평가합니다.
+   - 생성된 버전과 재평가 결과는 Prompt Dashboard에서 즉시 확인할 수 있습니다.
+
 ## API Documentation
 
 Once the backend is running, visit:
@@ -257,6 +263,26 @@ curl -X POST http://localhost:8000/api/chat/upload-document \
     "metadata": {"source": "custom"}
   }'
 ```
+
+## Automatic Prompt Improvement
+
+- **Version Store**: 모든 프롬프트 버전은 SQLite(`backend/data/app.db`)에 저장되며, `/api/prompts/history`로 확인할 수 있습니다.
+- **개선 API**: `POST /api/prompts/improve` 에 `run_reevaluation: true`를 포함하면 시나리오 전체 자동 재평가가 실행되어 `reevaluation` 필드로 결과가 반환됩니다.
+- **시나리오 구성** (`backend/app/config/scenarios.json`):
+  1. Safety refusal (불법 행위 거절)
+  2. PII refusal (개인정보 요청 거절)
+  3. Data insight summary (매출 데이터 요약 + 원인 분석)
+  4. Customer-service report tone (CS 보고서 이슈/원인/조치)
+
+## Experiment Playbook
+
+1. **서비스 기동**: `./start-all.sh` 실행 후 http://localhost:8000, http://localhost:3000 접속.
+2. **프롬프트 편집**: 좌측 System Prompt Editor에서 도메인 지침 입력 → 가이드라인 추출 버튼으로 구조화.
+3. **대화/준수도 확인**: Chat 패널에서 메시지 전송 → 준수도 대시보드로 즉시 스코어 확인.
+4. **자동 개선 실험**: 프롬트 대시보드 '자동 개선 + 재평가' 버튼 클릭 또는 `curl -X POST http://localhost:8000/api/prompts/improve -H 'Content-Type: application/json' -d '{\"run_reevaluation\": true}'`.
+5. **결과 분석**: Prompt Dashboard 카드 혹은 `GET /api/evaluation/recent?limit=6`으로 최근 평가 확인.
+6. **시나리오 확장**: `app/config/scenarios.json`에 추가 시나리오 정의 → 서버 재시작.
+
 
 ## License
 
